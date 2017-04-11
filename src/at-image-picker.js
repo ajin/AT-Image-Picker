@@ -30,14 +30,39 @@ atimagepicker = function( itemId, options ) {
   }
 
   var options = $.extend(defaults, options);
-  $(item).imagepicker(options);
-
+  _refresh();
   /* Bind event handler to the apexrefresh event for the main region element. Dynamic actions can then
    * refresh the fullcalendar via the 'Refresh' action.
    */
-  /*$(region).on( "apexrefresh", function() {
-      $(placeholder).fullCalendar( 'refetchEvents' )
-  }).trigger( "apexrefresh" );*/
+  $(item).on( "apexrefresh", function() {
+      //$(item).imagepicker(options);
+      _refresh();
+  }).trigger( "apexrefresh" );
+
+  // Uses AJAX to get the newest chart data
+  function _refresh() {
+    if (typeof options.ajax_identifier !== 'undefined' || options.ajax_identifier) {
+      console.log(options.ajax_identifier);
+      console.log(options.pageItems);
+
+      apex.server.plugin ( options.ajax_identifier,
+                          { x01: options.values,
+                            pageItems: options.pageItems},
+          {cache: false,
+          success: function( data ) {
+            $(item).empty();
+            apex.debug.log(data.content);
+            $(item).append(data.content);
+
+            console.log()
+            $(item).imagepicker(options);
+          }
+      });
+    } else {
+      //_doHtml("");
+    }
+  }
+
 
 }
 })( apex.jQuery, apex.util );
